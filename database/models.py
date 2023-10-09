@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, Float, Integer, ForeignKey
+from sqlalchemy import Column, String, DateTime, Float, Integer, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 
 from database import Base
@@ -38,6 +38,7 @@ class Transfer(Base):
     card_from_id = Column(Integer, ForeignKey('cards.card_id'))
     card_to_id = Column(Integer, ForeignKey('cards.card_id'))
     amount = Column(Float)
+    status = Column(Boolean, default=True)
 
     transaction_date = Column(DateTime)
     card_from_fk = relationship(UserCard, foreign_keys=[card_from_id], lazy='subquery')
