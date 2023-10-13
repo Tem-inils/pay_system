@@ -33,7 +33,7 @@ def delete_exact_card_db(card_id):
 
 
 # Изменение дизайна карты
-def edit_card_design_db(card_id, design_path):
+def edit_card_design_db(card_id: object, design_path: object) -> object:
     db = next(get_db())
 
     exact_card = db.query(UserCard).filter_by(card_id=card_id).first()

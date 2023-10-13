@@ -9,21 +9,23 @@ SQLALCHEMY_DATABASE_URI = "sqlite:///data.db"
 engine = create_engine(SQLALCHEMY_DATABASE_URI)
 
 # Генерация сессий
-SessonLocal = sessionmaker(bind=engine)
+SessionLocal = sessionmaker(bind=engine)
 
 # общий класс для моделей(models.py)
 Base = declarative_base()
 
-# функция для генерации свзязей к базе данных
-def get_db():
-    db = SessonLocal()
+# Импорт моделей
+from database import models
 
+
+# функция для генерации свзязей к базе данных
+
+def get_db():
+    db = SessionLocal()
     try:
         yield db
-
     except Exception:
         db.rollback()
         raise
-
     finally:
         db.close()
