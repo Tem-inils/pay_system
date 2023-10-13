@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
-# класс для валидации добовления карты
 
+# Класс для валидации добавления карты
 class CardAddModel(BaseModel):
     user_id: int
     card_number: int
@@ -11,8 +11,7 @@ class CardAddModel(BaseModel):
     cvv: int
 
 
-
-# Класс для валидации извенения
+# Класс для валидации изменения дизайна карты
 class EditCardModel(BaseModel):
     card_id: int
     design_path: str

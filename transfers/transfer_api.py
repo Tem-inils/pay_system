@@ -2,12 +2,14 @@ from fastapi import APIRouter
 
 from datetime import datetime
 
-from database.transferservice import  create_transaction_db, cancel_transfer_db, get_card_transaction_db
-
+from database.transferservice import create_transaction_db, cancel_transfer_db, \
+                                     get_card_transaction_db
 from transfers import CreateTransactionModel, CancelTransactionModel
 
-transaction_router = APIRouter(prefix='/transaction', tags=['Работа с платежали'])
+transaction_router = APIRouter(prefix='/transaction', tags=['Работа с платежами'])
 
+
+# Запрос на создание транзакции
 @transaction_router.post('/create')
 async def add_new_transaction(data: CreateTransactionModel):
     transaction_data = data.model_dump()
@@ -16,6 +18,7 @@ async def add_new_transaction(data: CreateTransactionModel):
     return {'status': 1, 'message': result}
 
 
+# Запрос на отмену транзакции
 @transaction_router.post('/cancel')
 async def cancel_transaction(data: CancelTransactionModel):
     cancel_data = data.model_dump()
@@ -23,12 +26,10 @@ async def cancel_transaction(data: CancelTransactionModel):
 
     return {'status': 1, 'message': result}
 
+
+# Запрос на получение всех транзакций определенной карты
 @transaction_router.get('/monitoring')
-async def get_card_transaction(card_id: int):
-    result = get_card_transaction_db(card_id=card_id)
+async def get_card_monitoring(card_id: int):
+    result = get_card_transaction_db(card_from_id=card_id)
 
-    if result:
-        return {'status': 1, 'message': result}
-
-    else:
-        return {'status': 0, 'message': 'транзакции не найдены'}
+    return {'status': 1, 'message': result}

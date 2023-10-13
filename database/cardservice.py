@@ -3,21 +3,22 @@ from datetime import datetime
 from database import get_db
 from database.models import UserCard
 
-# Добовление карт
+
+# Добавление карты
 def add_card_db(user_id, card_number, balance, card_name, exp_date, cvv):
     db = next(get_db())
 
-    new_cart = UserCard(user_id=user_id, card_number=card_number,
+    new_card = UserCard(user_id=user_id, card_number=card_number,
                         balance=balance, card_name=card_name,
                         exp_date=exp_date, cvv=cvv)
 
-    db.add(new_cart)
+    db.add(new_card)
     db.commit()
 
-    return "Карта успешно добавленна"
+    return "Карта успешно добавлена"
 
 
-# Удаление карт
+# Удаление карты
 def delete_exact_card_db(card_id):
     db = next(get_db())
 
@@ -27,13 +28,13 @@ def delete_exact_card_db(card_id):
         db.delete(exact_card)
         db.commit()
 
-        return "карта удаленна успешно"
+        return "карта успешно удалена"
 
     return "карта не найдена"
 
 
-# Изменение дизайна карты
-def edit_card_design_db(card_id: object, design_path: object) -> object:
+# Изменить дизайн карты
+def edit_card_design_db(card_id, design_path):
     db = next(get_db())
 
     exact_card = db.query(UserCard).filter_by(card_id=card_id).first()
@@ -42,7 +43,7 @@ def edit_card_design_db(card_id: object, design_path: object) -> object:
         exact_card.card_design = design_path
         db.commit()
 
-        return "дизайн обнавлен"
+        return "Дизайн обновлен"
 
     return "карта не найдена"
 
@@ -72,7 +73,3 @@ def check_card_info_db(card_number):
     checker = db.query(UserCard).filter_by(card_number=card_number).first()
 
     return checker
-
-
-
-
