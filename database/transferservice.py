@@ -38,7 +38,9 @@ def create_transaction_db(card_from, card_to, amount):
 
             # выдаем ответ
             return "перевод успешно выполнен"
+
         else:
+        
             return "недостаточно средств на балансе"
 
     return "Одна из карт не существует"

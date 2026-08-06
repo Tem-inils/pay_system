@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from datetime import datetime
 
 from database.userservice import register_user_db, edit_user_db, delete_user_db, \
-                                get_exact_user_db, check_user_email_db
+                                get_exact_user_db, check_user_email_db, get_all_user_db
 
 from user import UserRegisterModel, EditUserModel
 
@@ -34,6 +34,12 @@ async def get_user(user_id: int):
 
     return {'status': 1 if result else 0, 'message': result}
 
+# Получение информации о всех пользователях
+@user_router.get('/get-all-users')
+async def get_all_users():
+    result = get_all_user_db()
+
+    return result
 
 # Изменить данные о пользователе
 @user_router.put('/edit-data')

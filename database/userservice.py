@@ -26,6 +26,12 @@ def get_exact_user_db(user_id):
 
     return exact_user
 
+def get_all_user_db():
+    db = next(get_db())
+
+    users = db.query(User).all()
+    
+    return users
 
 # проверка данных (email)
 def check_user_email_db(email):
@@ -61,6 +67,7 @@ def edit_user_db(user_id, edit_type, new_data):
 
 # Удалить пользователя (user_id)
 def delete_user_db(user_id):
+
     db = next(get_db())
 
     exact_user = db.query(User).filter_by(user_id=user_id).first()
