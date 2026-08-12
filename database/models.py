@@ -1,24 +1,22 @@
 from sqlalchemy import Column, String, DateTime, Float, Integer, ForeignKey, Boolean
-from sqlalchemy.orm import relationship
-
+from sqlalchemy.orm import relationship, mapped_column, Mapped
+from datetime import datetime
 from database import Base
 
 
-# Таблица пользователей
 class User(Base):
     __tablename__ = 'users'
-    user_id = Column(Integer, autoincrement=True, primary_key=True)
-    name = Column(String)
-    surname = Column(String)
-    email = Column(String, unique=True, nullable=False)
-    phone_number = Column(String, unique=True, nullable=False)
-    city = Column(String)
-    password = Column(String, nullable=False)
+    user_id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
+    name: Mapped[str] = mapped_column(nullable=False)
+    surname: Mapped[str] = mapped_column(nullable=False)
+    email: Mapped[str] = mapped_column(unique=True, nullable=False)
+    phone_number: Mapped[str] = mapped_column(unique=True, nullable=False)
+    city: Mapped[str] = mapped_column()
+    hashed_password: Mapped[str] = mapped_column(nullable=False)
 
-    reg_date = Column(DateTime)
+    reg_date: Mapped[datetime]= mapped_column()
 
 
-# таблица карт пользователей
 class UserCard(Base):
     __tablename__ = 'cards'
     card_id = Column(Integer, primary_key=True, autoincrement=True)
@@ -33,7 +31,6 @@ class UserCard(Base):
     user_fk = relationship(User, lazy='subquery')
 
 
-# Таблица переводов
 class Transfer(Base):
     __tablename__ = 'transfers'
     transfer_id = Column(Integer, primary_key=True, autoincrement=True)
@@ -41,7 +38,7 @@ class Transfer(Base):
     card_to_id = Column(Integer, ForeignKey('cards.card_id'))
     amount = Column(Float)
 
-    status = Column(Boolean, default=True)  # новая колонка
+    status = Column(Boolean, default=True) 
 
     transaction_date = Column(DateTime)
 

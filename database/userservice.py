@@ -2,71 +2,97 @@ from datetime import datetime
 
 from database.models import User
 from database import get_db
+from database.security import hash_password, verify_password
 
 
-# Регистрация пользователя (name, surname, email, phone_number, reg_date, password, city)
-def register_user_db(name, surname, email, phone_number, reg_date, password, city):
+def register_user_db(
+            name: str,
+            surname: str,
+            email: str,
+            phone_number: str,
+            reg_date: datetime,
+            password: str,
+            city: str
+        ) -> object:
+    
     db = next(get_db())
 
-    new_user = User(name=name, surname=surname,
-                    email=email, phone_number=phone_number,
-                    reg_date=reg_date, password=password, city=city)
+    new_user = User(
+            name=name,
+            surname=surname,
+            email=email,
+            phone_number=phone_number,     
+            reg_date=reg_date,
+            hashed_password=hash_password(password),
+            city=city
+        )
 
     db.add(new_user)
     db.commit()
 
-    return "Пользователь успешно зарегистрирован"
+    return new_user
 
+def user_login_db(email: str, password: str):
+    db = next(get_db())
 
-# получить информацию о пользователе (user_id)
-def get_exact_user_db(user_id):
+    user = db.query(User).filter_by(email=email).first()
+    
+    if user:
+        password_checker = verify_password(plain_password=password, hashed_password=user.hashed_password)
+        
+        if password_checker:
+            return user
+        
+    
+    return "Incorrect email addres or password"
+
+def get_exact_user_db(user_id: int) -> object:
+
     db = next(get_db())
 
     exact_user = db.query(User).filter_by(user_id=user_id).first()
 
     return exact_user
 
-def get_all_user_db():
+def get_all_user_db() -> object:
+
     db = next(get_db())
 
     users = db.query(User).all()
     
     return users
 
-# проверка данных (email)
-def check_user_email_db(email):
+def check_user_existence_db(email: str, phone_number: str):
+
     db = next(get_db())
 
-    checker = db.query(User).filter_by(email=email).first()
+    check_user_email = db.query(User).filter_by(email=email).first() 
+    if check_user_email: 
+        return "This email adress has already been used"
+    
+    check_user_number = db.query(User).filter_by(phone_number=phone_number).first()
+    if check_user_number:
+        return "This phone number has already been used"
 
-    return checker
+def edit_user_db(user_id: int, edit_type: str, new_data: str):
 
-
-# изменить данные (user_id, edit_type, new_data)
-def edit_user_db(user_id, edit_type, new_data):
     db = next(get_db())
 
-    exact_user = db.query(User).filter_by(user_id=user_id).first()
+    user = db.query(User).filter_by(user_id=user_id).first()
 
-    if exact_user:
+    if user:
         if edit_type == 'email':
-            exact_user.email = new_data
+            user.email = new_data
 
         elif edit_type == 'password':
-            exact_user.password = new_data
+            user.hashed_password = new_data
 
         elif edit_type == 'city':
-            exact_user.city = new_data
+            user.city = new_data
 
         db.commit()
 
-        return "Данные успешно изменены"
-
-    return "Пользователь не найден"
-
-
-# Удалить пользователя (user_id)
-def delete_user_db(user_id):
+def delete_user_db(user_id: int) -> str:
 
     db = next(get_db())
 
@@ -76,6 +102,6 @@ def delete_user_db(user_id):
         db.delete(exact_user)
         db.commit()
 
-        return "Пользователь успешно удален"
+        return "User was removed"
 
-    return "Пользователь не найден"
+    return "User not found"

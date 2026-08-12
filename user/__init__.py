@@ -1,7 +1,5 @@
 from pydantic import BaseModel
 
-
-# Класс валидации для регистрации
 class UserRegisterModel(BaseModel):
     name: str
     surname: str
@@ -10,9 +8,11 @@ class UserRegisterModel(BaseModel):
     password: str
     city: str
 
-
-# Класс валидации для изменения данных пользователя
 class EditUserModel(BaseModel):
     user_id: int
     edit_type: str
     new_data: str
+
+class LoginSchema(BaseModel):
+    email: str
+    password: str

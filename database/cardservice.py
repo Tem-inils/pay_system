@@ -4,7 +4,6 @@ from database import get_db
 from database.models import UserCard
 
 
-# Добавление карты
 def add_card_db(user_id, card_number, balance, card_name, exp_date, cvv):
     db = next(get_db())
 
@@ -18,7 +17,6 @@ def add_card_db(user_id, card_number, balance, card_name, exp_date, cvv):
     return "Карта успешно добавлена"
 
 
-# Удаление карты
 def delete_exact_card_db(card_id):
     db = next(get_db())
 
@@ -32,8 +30,6 @@ def delete_exact_card_db(card_id):
 
     return "карта не найдена"
 
-
-# Изменить дизайн карты
 def edit_card_design_db(card_id, design_path):
     db = next(get_db())
 
@@ -48,7 +44,6 @@ def edit_card_design_db(card_id, design_path):
     return "карта не найдена"
 
 
-# Вывести все карты определенного пользователя
 def get_exact_user_cards_db(user_id):
     db = next(get_db())
 
@@ -57,7 +52,6 @@ def get_exact_user_cards_db(user_id):
     return exact_user_cards
 
 
-# Вывести определенную карту
 def get_exact_card_db(user_id, card_id):
     db = next(get_db())
 
@@ -66,7 +60,6 @@ def get_exact_card_db(user_id, card_id):
     return exact_user_card
 
 
-# проверка карты на наличие в базе
 def check_card_info_db(card_number):
     db = next(get_db())
 
