@@ -7,6 +7,9 @@ from card.card_api import card_router
 from transfers.transfer_api import transaction_router
 from currency.currency_api import currency_router
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from database import Base, engine
 
 Base.metadata.create_all(bind=engine)

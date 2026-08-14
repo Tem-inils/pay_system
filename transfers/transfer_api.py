@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from datetime import datetime
 
-from database.transferservice import create_transaction_db, cancel_transfer_db, \
+from transfers.transferservice import create_transaction_db, cancel_transfer_db, \
                                      get_card_transaction_db
 from transfers import CreateTransactionModel, CancelTransactionModel
 

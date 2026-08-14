@@ -1,14 +1,16 @@
-from fastapi import APIRouter
-from datetime import datetime
-
-from database.userservice import register_user_db, edit_user_db, delete_user_db, \
-                                get_exact_user_db, check_user_existence_db, get_all_user_db, \
-                                user_login_db
-
-from user import UserRegisterModel, EditUserModel, LoginSchema
+from user import *
 
 user_router = APIRouter(prefix='/user', tags=['Работа с пользователя'])
 
+@user_router.get('/me')
+async def get_me(current_user: User = Depends(get_current_user)):
+    
+    return {
+        "user_id": current_user.id,
+        "name": current_user.name,
+        "surname": current_user.surname,
+        "email": current_user.email,
+    }
 
 @user_router.get('/check_user')
 async def check_existence(email: str, phone_number: str):
@@ -30,15 +32,31 @@ async def register_user(data: UserRegisterModel):
 @user_router.post('/login')
 async def login(data: LoginSchema):
 
-    user = user_login_db(data.email, data.password)
+    user = user_login_db(
+            data.email,
+            data.password
+        )
+    
+    if not user: 
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password"
+        )
+    
 
-    return {"status": 0, "message": user}
+    access_token = create_access_token(
+        user_id=user.user_id
+    )
+
+    return {
+            "access_token": access_token,
+            "token_type": "bearer"
+        }
 
 @user_router.get('/info')
-async def get_user(user_id: int):
-    result = get_exact_user_db(user_id)
+async def get_user(current_user: User = Depends(get_current_user)):
 
-    return {'status': 1 if result else 0, 'message': result}
+    return {'status': 1, 'message': current_user}
 
 @user_router.get('/get-all-users')
 async def get_all_users():

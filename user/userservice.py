@@ -1,8 +1,4 @@
-from datetime import datetime
-
-from database.models import User
-from database import get_db
-from database.security import hash_password, verify_password
+from user import *
 
 
 def register_user_db(
@@ -37,15 +33,14 @@ def user_login_db(email: str, password: str):
 
     user = db.query(User).filter_by(email=email).first()
     
-    if user:
-        password_checker = verify_password(plain_password=password, hashed_password=user.hashed_password)
-        
-        if password_checker:
-            return user
-        
+    if not user: 
+        return None
     
-    return "Incorrect email addres or password"
-
+    if not verify_password(plain_password=password, hashed_password=user.hashed_password):
+        return None
+    
+    return user
+    
 def get_exact_user_db(user_id: int) -> object:
 
     db = next(get_db())
