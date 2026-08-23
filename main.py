@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI
 
 from starlette.templating import Jinja2Templates
@@ -7,8 +10,7 @@ from card.card_api import card_router
 from transfers.transfer_api import transaction_router
 from currency.currency_api import currency_router
 
-from dotenv import load_dotenv
-load_dotenv()
+
 
 from database import Base, engine
 

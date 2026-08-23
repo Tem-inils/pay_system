@@ -1,12 +1,20 @@
-from user import *
+from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi.security import OAuth2PasswordRequestForm
+from datetime import datetime
+from core.security import create_access_token
+from user.dependencies import get_current_user
+from user.schemas import UserRegisterModel, EditUserModel, LoginModel
+from user.userservice import register_user_db, edit_user_db, delete_user_db, \
+                                check_user_existence_db, get_all_user_db, \
+                                user_login_db
 
 user_router = APIRouter(prefix='/user', tags=['Работа с пользователя'])
 
 @user_router.get('/me')
-async def get_me(current_user: User = Depends(get_current_user)):
+async def get_me(current_user = Depends(get_current_user)):
     
     return {
-        "user_id": current_user.id,
+        "user_id": current_user.user_id,
         "name": current_user.name,
         "surname": current_user.surname,
         "email": current_user.email,
@@ -30,10 +38,10 @@ async def register_user(data: UserRegisterModel):
     return {'status': 0, 'message': checker}
 
 @user_router.post('/login')
-async def login(data: LoginSchema):
+async def login(data: OAuth2PasswordRequestForm = Depends()):
 
     user = user_login_db(
-            data.email,
+            data.username,
             data.password
         )
     
@@ -54,7 +62,7 @@ async def login(data: LoginSchema):
         }
 
 @user_router.get('/info')
-async def get_user(current_user: User = Depends(get_current_user)):
+async def get_user(current_user = Depends(get_current_user)):
 
     return {'status': 1, 'message': current_user}
 

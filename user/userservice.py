@@ -1,4 +1,10 @@
-from user import *
+""" SIDE IMPORTS """
+from datetime import datetime
+
+""" DATABASE IMPORTS """
+from database import get_db
+from database.models import User
+from core.security import hash_password, verify_password
 
 
 def register_user_db(
