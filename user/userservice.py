@@ -1,9 +1,10 @@
-""" SIDE IMPORTS """
 from datetime import datetime
 
-""" DATABASE IMPORTS """
 from database import get_db
 from database.models import User
+from sqlalchemy import or_
+from sqlalchemy.orm import Session
+from user.schemas import UserUpdate
 from core.security import hash_password, verify_password
 
 
@@ -32,7 +33,14 @@ def register_user_db(
     db.add(new_user)
     db.commit()
 
-    return new_user
+    return {
+        "user_id": new_user.user_id,
+        "name": new_user.name,
+        "surname": new_user.surname, 
+        "email": new_user.email,
+        "phone_number": new_user.phone_number, 
+        "city": new_user.city
+    }
 
 def user_login_db(email: str, password: str):
     db = next(get_db())
@@ -47,9 +55,10 @@ def user_login_db(email: str, password: str):
     
     return user
     
-def get_exact_user_db(user_id: int) -> object:
-
-    db = next(get_db())
+def get_exact_user_db(
+            user_id: int,
+            db: Session
+        ) -> User | None:
 
     exact_user = db.query(User).filter_by(user_id=user_id).first()
 
@@ -63,36 +72,44 @@ def get_all_user_db() -> object:
     
     return users
 
-def check_user_existence_db(email: str, phone_number: str):
+def check_user_existence_db(email: str, phone_number: str) -> User | None:
 
     db = next(get_db())
 
-    check_user_email = db.query(User).filter_by(email=email).first() 
-    if check_user_email: 
-        return "This email adress has already been used"
+    check_user = db.query(User).filter(
+        or_(
+            User.email == email,
+            User.phone_number == phone_number,
+        )
+    ).first() 
+
+    return check_user
+
+def edit_user_db(db: Session, user: User, data: UserUpdate) -> User:
+
+    if data.name is not None:
+        user.name = data.name
     
-    check_user_number = db.query(User).filter_by(phone_number=phone_number).first()
-    if check_user_number:
-        return "This phone number has already been used"
+    if data.surname is not None:
+        user.surname = data.surname
+    
+    if data.email is not None:
+        user.email = data.email
+    
+    if data.phone_number is not None:
+        user.phone_number = data.phone_number
+    
+    if data.city is not None: 
+        user.city = data.city
 
-def edit_user_db(user_id: int, edit_type: str, new_data: str):
+    if data.password is not None: 
+        user.hashed_password = hash_password(data.password)
 
-    db = next(get_db())
+    db.commit()
+    db.refresh(user)
 
-    user = db.query(User).filter_by(user_id=user_id).first()
-
-    if user:
-        if edit_type == 'email':
-            user.email = new_data
-
-        elif edit_type == 'password':
-            user.hashed_password = new_data
-
-        elif edit_type == 'city':
-            user.city = new_data
-
-        db.commit()
-
+    return user
+    
 def delete_user_db(user_id: int) -> str:
 
     db = next(get_db())

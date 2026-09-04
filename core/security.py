@@ -41,7 +41,7 @@ def create_access_token(user_id: int) -> str:
         ALGORITHM
     )
 
-def decode_access_token(token: str):
+def decode_access_token(token: str) -> int | None:
     try: 
         payload = jwt.decode(
             token,
@@ -53,8 +53,9 @@ def decode_access_token(token: str):
 
         if user_id is None: 
             return None
+        
+        return int(user_id)
             
     except (InvalidTokenError, ValueError): 
         return None
     
-    return user_id
