@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from database import get_db
 from database.models import User
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
@@ -15,10 +14,10 @@ def register_user_db(
             phone_number: str,
             reg_date: datetime,
             password: str,
-            city: str
+            city: str,
+            db: Session,
         ) -> object:
     
-    db = next(get_db())
 
     new_user = User(
             name=name,
@@ -32,18 +31,12 @@ def register_user_db(
 
     db.add(new_user)
     db.commit()
+    db.refresh(new_user)
 
-    return {
-        "user_id": new_user.user_id,
-        "name": new_user.name,
-        "surname": new_user.surname, 
-        "email": new_user.email,
-        "phone_number": new_user.phone_number, 
-        "city": new_user.city
-    }
+    return new_user
 
-def user_login_db(email: str, password: str):
-    db = next(get_db())
+def user_login_db(email: str, password: str, db: Session):
+    
 
     user = db.query(User).filter_by(email=email).first()
     
@@ -63,9 +56,9 @@ def user_change_password_db(db: Session, user: User, data: ChangeUserPasswordMod
         db.commit()
         db.refresh(user)
 
-        return user
+        return True
     else: 
-        return None
+        return False 
 
 def get_exact_user_db(
             user_id: int,
@@ -76,17 +69,7 @@ def get_exact_user_db(
 
     return exact_user
 
-def get_all_user_db() -> object:
-
-    db = next(get_db())
-
-    users = db.query(User).all()
-    
-    return users
-
-def check_user_existence_db(email: str, phone_number: str) -> User | None:
-
-    db = next(get_db())
+def check_user_existence_db(email: str, phone_number: str, db: Session) -> User | None:
 
     check_user = db.query(User).filter(
         or_(
@@ -112,16 +95,9 @@ def edit_user_db(
 
     return user
     
-def delete_user_db(user_id: int) -> str:
-
-    db = next(get_db())
-
-    exact_user = db.query(User).filter_by(user_id=user_id).first()
-
-    if exact_user:
-        db.delete(exact_user)
-        db.commit()
-
-        return "User was removed"
-
-    return "User not found"
+def delete_user_db(
+    db: Session,
+    user: User,
+) -> None:
+    db.delete(user)
+    db.commit()
