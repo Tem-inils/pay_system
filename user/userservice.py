@@ -4,7 +4,7 @@ from database import get_db
 from database.models import User
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
-from user.schemas import UserUpdate
+from user.schemas import UserUpdate, ChangeUserPasswordModel
 from core.security import hash_password, verify_password
 
 
@@ -54,7 +54,19 @@ def user_login_db(email: str, password: str):
         return None
     
     return user
-    
+
+def user_change_password_db(db: Session, user: User, data: ChangeUserPasswordModel):
+
+    if verify_password(data.current_password, user.hashed_password):
+        user.hashed_password = hash_password(data.new_password)
+        
+        db.commit()
+        db.refresh(user)
+
+        return user
+    else: 
+        return None
+
 def get_exact_user_db(
             user_id: int,
             db: Session
@@ -85,25 +97,15 @@ def check_user_existence_db(email: str, phone_number: str) -> User | None:
 
     return check_user
 
-def edit_user_db(db: Session, user: User, data: UserUpdate) -> User:
+def edit_user_db(
+    db: Session,
+    user: User,
+    data: dict,
+) -> User:
 
-    if data.name is not None:
-        user.name = data.name
-    
-    if data.surname is not None:
-        user.surname = data.surname
-    
-    if data.email is not None:
-        user.email = data.email
-    
-    if data.phone_number is not None:
-        user.phone_number = data.phone_number
-    
-    if data.city is not None: 
-        user.city = data.city
 
-    if data.password is not None: 
-        user.hashed_password = hash_password(data.password)
+    for field, value in data.items():
+        setattr(user, field, value)
 
     db.commit()
     db.refresh(user)

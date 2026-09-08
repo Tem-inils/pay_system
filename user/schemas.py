@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict, Field
 
 class UserUpdate(BaseModel):
     name: str | None = None
@@ -6,7 +6,16 @@ class UserUpdate(BaseModel):
     email: EmailStr | None = None
     phone_number: str | None = None
     city: str | None = None
-    password: str | None = None
+
+    model_config = ConfigDict(
+        extra="forbid",
+        json_schema_extra={
+            "example": {
+                "name": "Rafael",
+                "city": "Tashkent"
+            }
+        }
+    )
 
 class UserRegisterModel(BaseModel):
     name: str
@@ -19,6 +28,14 @@ class UserRegisterModel(BaseModel):
 class UserLoginModel(BaseModel):
     email: EmailStr 
     password: str
+
+class ChangeUserPasswordModel(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=8)
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
 
 class UserResponse(BaseModel):
     user_id: int
