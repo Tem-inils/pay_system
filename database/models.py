@@ -1,12 +1,18 @@
-from sqlalchemy import Column, String, DateTime, Float, Integer, ForeignKey, Boolean
+from sqlalchemy import Column, String, DateTime, Float, Integer, ForeignKey, Boolean, Numeric, Enum as SqlEnum
 from sqlalchemy.orm import relationship, mapped_column, Mapped
+from decimal import Decimal
+from enum import Enum
 from datetime import datetime
 from database import Base
 
+class CardNetwork(str, Enum):
+    VISA = "VISA"
+    MASTERCARD = "MASTERCARD"
+    UNIONPAY = "UNIONPAY"
 
 class User(Base):
     __tablename__ = 'users'
-    user_id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
+    id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
     # username: Mapped[str] = mapped_column(nullable=False, unique=True)
     name: Mapped[str] = mapped_column(nullable=False)
     surname: Mapped[str] = mapped_column(nullable=False)
@@ -18,30 +24,42 @@ class User(Base):
     reg_date: Mapped[datetime]= mapped_column()
 
 
-class UserCard(Base):
-    __tablename__ = 'cards'
-    card_id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('users.user_id'))
-    card_number = Column(Integer, nullable=False)
-    balance = Column(Float, default=0)
-    exp_date = Column(Integer, nullable=False)
-    card_name = Column(String)
-    cvv = Column(Integer)
-    card_design = Column(String)
+class Account(Base):
+    __tablename__ = "accounts"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True,)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True,)
+    account_number: Mapped[str] = mapped_column(String(32), unique=True, nullable=False, index=True,)
+    currency: Mapped[str] = mapped_column(String(3), nullable=False)
+    balance: Mapped[Decimal] = mapped_column(Numeric(18, 4), nullable=False, default=Decimal("0.0000"))
+    is_acive: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    cards: Mapped[list["Card"]] = relationship(back_populates="account")
 
-    user_fk = relationship(User, lazy='subquery')
+    created_at: Mapped[datetime]= mapped_column(DateTime, nullable=False)
+
+
+class Card(Base):
+    __tablename__ = "cards"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True,)
+    accound_id: Mapped[int] = mapped_column(ForeignKey("accounts.id"), nullable=False, index=True,)
+    card_number: Mapped[str] = mapped_column(String(32), unique=True, nullable=False, index=True,)
+    network: Mapped[CardNetwork] = mapped_column(SqlEnum(CardNetwork), nullable=False,)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True,)
+    account: Mapped["Account"] = relationship(back_populates="cards",)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
 
 class Transfer(Base):
     __tablename__ = 'transfers'
     transfer_id = Column(Integer, primary_key=True, autoincrement=True)
-    card_from_id = Column(Integer, ForeignKey('cards.card_id'))
-    card_to_id = Column(Integer, ForeignKey('cards.card_id'))
+    card_from_id = Column(Integer, ForeignKey('accounts.id'))
+    card_to_id = Column(Integer, ForeignKey('accounts.id'))
     amount = Column(Float)
 
     status = Column(Boolean, default=True) 
 
     transaction_date = Column(DateTime)
 
-    card_from_fk = relationship(UserCard, foreign_keys=[card_from_id], lazy='subquery')
-    card_to_fk = relationship(UserCard, foreign_keys=[card_to_id], lazy='subquery')
+    card_from_fk = relationship(Account, foreign_keys=[card_from_id], lazy='subquery')
+    card_to_fk = relationship(Account, foreign_keys=[card_to_id], lazy='subquery')

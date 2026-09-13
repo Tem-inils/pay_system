@@ -9,5 +9,5 @@ class CardAddModel(BaseModel):
     cvv: int
 
 class EditCardModel(BaseModel):
-    card_id: int
+    id: int
     design_path: str

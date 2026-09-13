@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, ConfigDict, Field
 
-class UserUpdate(BaseModel):
+class UserUpdateModel(BaseModel):
     name: str | None = None
     surname: str | None = None
     email: EmailStr | None = None
@@ -38,7 +38,7 @@ class ChangeUserPasswordModel(BaseModel):
     )
 
 class UserResponse(BaseModel):
-    user_id: int
+    id: int
     name: str
     surname: str
     email: str

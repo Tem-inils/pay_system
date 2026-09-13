@@ -1,5 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
+from user.dependencies import get_current_user
 from card import CardAddModel, EditCardModel
 from card.cardservice import get_exact_card_db, get_exact_user_cards_db,\
                                  add_card_db, delete_exact_card_db, edit_card_design_db, \
@@ -8,7 +9,7 @@ from card.cardservice import get_exact_card_db, get_exact_user_cards_db,\
 card_router = APIRouter(prefix='/card', tags=['Работа с картами'])
 
 @card_router.post('/add')
-async def add_new_card(data: CardAddModel):
+async def add_new_card(data: CardAddModel, current_user = Depends(get_current_user),):
     card_data = data.model_dump()
 
     checker = check_card_info_db(data.card_number)

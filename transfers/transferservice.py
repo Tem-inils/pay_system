@@ -1,11 +1,11 @@
 from datetime import datetime
 
-from database.models import Transfer, UserCard
+from database.models import Transfer, Account
 from database import get_db
 
 
 def _validate_card(card_number, db):
-    exact_card = db.query(UserCard).filter_by(card_number=card_number).first()
+    exact_card = db.query(Account).filter_by(card_number=card_number).first()
 
     return exact_card
 

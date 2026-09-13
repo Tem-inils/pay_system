@@ -3,30 +3,24 @@ from datetime import datetime
 from database.models import User
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
-from user.schemas import UserUpdate, ChangeUserPasswordModel
+from user.schemas import UserRegisterModel, UserUpdateModel, ChangeUserPasswordModel
 from core.security import hash_password, verify_password
 
 
 def register_user_db(
-            name: str,
-            surname: str,
-            email: str,
-            phone_number: str,
-            reg_date: datetime,
-            password: str,
-            city: str,
+            data: UserRegisterModel,
             db: Session,
         ) -> object:
     
 
     new_user = User(
-            name=name,
-            surname=surname,
-            email=email,
-            phone_number=phone_number,     
-            reg_date=reg_date,
-            hashed_password=hash_password(password),
-            city=city
+            name=data.name,
+            surname=data.surname,
+            email=data.email,
+            phone_number=data.phone_number,     
+            reg_date=datetime.now(),
+            hashed_password=hash_password(data.password),
+            city=data.city
         )
 
     db.add(new_user)
@@ -65,7 +59,7 @@ def get_exact_user_db(
             db: Session
         ) -> User | None:
 
-    exact_user = db.query(User).filter_by(user_id=user_id).first()
+    exact_user = db.query(User).filter_by(id=user_id).first()
 
     return exact_user
 
@@ -81,6 +75,7 @@ def check_user_existence_db(email: str, phone_number: str, db: Session) -> User 
     return check_user
 
 def edit_user_db(
+        
     db: Session,
     user: User,
     data: dict,
