@@ -1,30 +1,35 @@
-from fastapi import APIRouter
-
+from fastapi import APIRouter, Depends, HTTPException
 from datetime import datetime
 
-from transfers.transferservice import create_transaction_db, cancel_transfer_db, \
-                                     get_card_transaction_db
-from transfers import CreateTransactionModel, CancelTransactionModel
+from sqlalchemy.orm import Session
+from database import get_db
+from database.models import User
 
-transaction_router = APIRouter(prefix='/transaction', tags=['Работа с платежами'])
+from user.dependencies import get_current_user
+from transfers.transferservice import create_transaction_db, get_card_transaction_db
+from transfers.schemas import CreateTransactionModel, CancelTransactionModel
+
+transaction_router = APIRouter(prefix='/transaction', tags=['Transactions'])
 
 
-# Запрос на создание транзакции
 @transaction_router.post('/create')
-async def add_new_transaction(data: CreateTransactionModel):
-    transaction_data = data.model_dump()
-    result = create_transaction_db(**transaction_data)
+async def new_transaction(
+        data: CreateTransactionModel,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user),
+):
+    if data.amount > 0:
+        return create_transaction_db(db=db, user=current_user, data=data)
+    else:
+        raise HTTPException(status_code=400, detail="Insufficient funds")
 
-    return {'status': 1, 'message': result}
-
-
-# Запрос на отмену транзакции
-@transaction_router.post('/cancel')
-async def cancel_transaction(data: CancelTransactionModel):
-    cancel_data = data.model_dump()
-    result = cancel_transfer_db(**cancel_data)
-
-    return {'status': 1, 'message': result}
+# # Запрос на отмену транзакции
+# @transaction_router.post('/cancel')
+# async def cancel_transaction(data: CancelTransactionModel):
+#     cancel_data = data.model_dump()
+#     result = cancel_transfer_db(**cancel_data)
+#
+#     return {'status': 1, 'message': result}
 
 
 # Запрос на получение всех транзакций определенной карты

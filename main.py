@@ -5,6 +5,7 @@ from fastapi import FastAPI
 
 from starlette.templating import Jinja2Templates
 
+from account.account_api import account_router
 from user.user_api import user_router
 from card.card_api import card_router
 from transfers.transfer_api import transaction_router
@@ -25,6 +26,7 @@ from html_example.html_show import html_router
 app.include_router(html_router)
 
 app.include_router(user_router)
+app.include_router(account_router)
 app.include_router(card_router)
 app.include_router(transaction_router)
 app.include_router(currency_router)

@@ -8,13 +8,14 @@ def add_card_db(user_id, card_number, balance, card_name, exp_date, cvv):
     db = next(get_db())
 
     new_card = Account(user_id=user_id, card_number=card_number,
-                        balance=balance, card_name=card_name,
-                        exp_date=exp_date, cvv=cvv)
+                       balance=balance, card_name=card_name,
+                       exp_date=exp_date, cvv=cvv)
 
     db.add(new_card)
     db.commit()
 
     return "Карта успешно добавлена"
+
 
 def delete_exact_card_db(card_id):
     db = next(get_db())
@@ -29,6 +30,7 @@ def delete_exact_card_db(card_id):
 
     return "карта не найдена"
 
+
 def edit_card_design_db(card_id, design_path):
     db = next(get_db())
 
@@ -42,6 +44,7 @@ def edit_card_design_db(card_id, design_path):
 
     return "карта не найдена"
 
+
 def get_exact_user_cards_db(user_id):
     db = next(get_db())
 
@@ -49,12 +52,14 @@ def get_exact_user_cards_db(user_id):
 
     return exact_user_cards
 
+
 def get_exact_card_db(user_id, card_id):
     db = next(get_db())
 
     exact_user_card = db.query(Account).filter_by(user_id=user_id, id=card_id).first()
 
     return exact_user_card
+
 
 def check_card_info_db(card_number):
     db = next(get_db())
