@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from decimal import Decimal
-from account.dependencies import AccountCurrency
+from database.models import AccountCurrency
 
 
 class CreateAccountModel(BaseModel):
@@ -25,3 +25,5 @@ class AccountResponseModel(BaseModel):
     currency: str
     balance: Decimal
     is_active: bool
+
+

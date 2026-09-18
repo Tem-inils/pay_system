@@ -15,7 +15,7 @@ class CardNetwork(str, Enum):
 class AccountCurrency(str, Enum):
     USD = "USD"
     EUR = "EUR"
-    TRL = "TRL"
+    TRL = "TRY"
 
 
 class User(Base):
@@ -29,7 +29,7 @@ class User(Base):
     city: Mapped[str] = mapped_column()
     hashed_password: Mapped[str] = mapped_column(nullable=False)
 
-    reg_date: Mapped[datetime] = mapped_column()
+    reg_date: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
 
 
 class Account(Base):
@@ -55,19 +55,15 @@ class Card(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, )
     account: Mapped["Account"] = relationship(back_populates="cards", )
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
 
 
 class Transfer(Base):
     __tablename__ = 'transfers'
-    transfer_id = Column(Integer, primary_key=True, autoincrement=True)
-    card_from_id = Column(Integer, ForeignKey('accounts.id'))
-    card_to_id = Column(Integer, ForeignKey('accounts.id'))
-    amount = Column(Float)
+    transfer_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, )
+    account_from_id: Mapped[int] = mapped_column(ForeignKey("accounts.id"), nullable=False, )
+    account_to_id: Mapped[int] = mapped_column(ForeignKey("accounts.id"), nullable=False, )
+    amount: Mapped[Decimal] = mapped_column(Numeric(18, 4), nullable=False)
+    status: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
-    status = Column(Boolean, default=True)
-
-    transaction_date = Column(DateTime)
-
-    card_from_fk = relationship(Account, foreign_keys=[card_from_id], lazy='subquery')
-    card_to_fk = relationship(Account, foreign_keys=[card_to_id], lazy='subquery')
+    transaction_date: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)

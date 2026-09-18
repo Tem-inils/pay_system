@@ -102,7 +102,7 @@ def update_me(data: UserUpdateModel, current_user: User = Depends(get_current_us
             db.query(User)
             .filter(
                 User.phone_number == update_data["phone_number"],
-                User.user_id != current_user.user_id,
+                User.id != current_user.id,
             )
             .first()
         )

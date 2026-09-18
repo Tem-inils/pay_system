@@ -18,61 +18,58 @@ def create_transaction_db(
         data: CreateTransactionModel,
         user: User,
 ):
-    account1 = _validate_account(data.account_from, db)
-    account2 = _validate_account(data.account_to, db)
+    account_from = _validate_account(data.account_from, db)
+    account_to = _validate_account(data.account_to, db)
 
-    if account1 and account2:
+    if not account_from:
+        return f"Account: {data.account_from} doesn't exist"
 
-        if account1.currency == account2.currency:
+    if not account_to:
+        return f"Account: {data.account_to} doesn't exist"
 
-            if account1.balance >= data.amount:
+    if account_from.user_id != user.id:
+        return "You can use only an account that belongs to you."
 
-                try:
-                    account1.balance -= data.amount
-                    account2.balance += data.amount
+    if account_from.currency != account_to.currency:
+        return "You can't make a transaction between different currencies."
 
-                    db.commit()
-                    db.refresh(account1)
-                    db.refresh(account2)
+    if account_from.balance < data.amount:
+        return "Not enough money"
 
-                except Exception:
-                    db.rollback()
+    try:
+        account_from.balance -= data.amount
+        account_to.balance += data.amount
 
-                return "Transaction completed"
+        transfer = Transfer(
+            account_from=account_from.id,
+            account_to=account_to.id,
+            amount=data.amount,
+        )
 
-            else:
-                return "Not enough money"
-        else:
-            return "You can't make transaction. Between two different currencies"
-    else:
-        return f"Account: {data.account_from} doesn't exist" if account1 else f"Account: {data.account_to} doesn't exist"
+        db.add(transfer)
+
+        db.commit()
+
+        db.refresh(account_from)
+        db.refresh(account_to)
+        db.refresh(transfer)
+
+        return "Transaction completed"
+
+    except Exception as e:
+        db.rollback()
+
+        print(e)
+
+        return "Something went wrong. Please try again later."
 
 
-def get_card_transaction_db(card_from_id):
-    db = next(get_db())
+def get_transaction_db(db: Session, user: User):
+    pass
 
-    card_transaction = db.query(Transfer).filter_by(card_from_id=card_from_id).all()
 
-    return card_transaction
+def cancel_transaction_db(db: Session, user: User):
+    pass
 
-# def cancel_transfer_db(card_from, card_to, amount, transfer_id):
-#     db = next(get_db())
-#
-#     check_card_from = _validate_card(card_from, db)
-#     check_card_to = _validate_card(card_to, db)
-#
-#     if check_card_from and check_card_to:
-#         if check_card_to.balance >= amount:
-#             check_card_from.balance += amount
-#             check_card_to.balance -= amount
-#
-#             transfer = db.query(Transfer).filter_by(transfer_id=transfer_id).first()
-#
-#             # there was a status here doesn't work
-#             db.commit()
-#
-#             return "перевод успешно отменен"
-#         else:
-#             return "недостаточно средств на балансе"
-#
-#     return "Одна из карт не существует"
+
+
